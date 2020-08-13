@@ -60,8 +60,16 @@ export default function DeviceManager(props) {
   const onDragEnd = result => {
     const {source, destination} = result;
 
+    if (!source || !destination) {
+      return;
+    }
+
     const sourceList = devices[source.droppableId];
     const destinationList = devices[destination.droppableId];
+
+    if (!sourceList || !destinationList) {
+      return;
+    }
 
     const itemDragged =
       source.droppableId === 'inactive'
@@ -92,14 +100,14 @@ export default function DeviceManager(props) {
         className={styles.editButton}
       >
         Customize
-        {/*<EditIcon style={{fontSize: 'inherit'}} />*/}
+        {/* <EditIcon style={{fontSize: 'inherit'}} /> */}
       </Button>
       <Dialog fullScreen open={open} onClose={closeDialog}>
         <AppBar className={classes.appBar} color="secondary">
           <Toolbar>
-            {/*<IconButton edge="start" onClick={closeDialog} aria-label="close">
+            {/* <IconButton edge="start" onClick={closeDialog} aria-label="close">
               <CloseIcon />
-             </IconButton>*/}
+             </IconButton> */}
             <Typography variant="h6" className={classes.title}>
               Manage Devices
             </Typography>
@@ -119,7 +127,7 @@ export default function DeviceManager(props) {
                   <LightBulbIcon height={30} color="#FFD517" />
                   Active Devices
                 </div>
-                <DeviceList droppableId={'active'} devices={devices.active} />
+                <DeviceList droppableId="active" devices={devices.active} />
               </Grid>
               <Grid item className={styles.section}>
                 <div className={styles.listTitle}>
@@ -127,11 +135,11 @@ export default function DeviceManager(props) {
                   Inactive Devices
                 </div>
                 <DeviceList
-                  droppableId={'inactive'}
+                  droppableId="inactive"
                   devices={devices.inactive}
-                  enableFiltering={true}
+                  enableFiltering
                   onFiltering={onInactiveListFiltering}
-                  enableCustomDeviceDeletion={true}
+                  enableCustomDeviceDeletion
                   deleteDevice={props.deleteDevice}
                 />
               </Grid>

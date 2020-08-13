@@ -1,11 +1,6 @@
 import React, {Fragment} from 'react';
 
 export default class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {hasError: false};
-  }
-
   static getDerivedStateFromError(error) {
     // Update state so the next render will show the fallback UI.
     return {hasError: true, error};
@@ -18,6 +13,11 @@ export default class ErrorBoundary extends React.Component {
       error: JSON.stringify(error, Object.getOwnPropertyNames(error)),
       errorInfo,
     });
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {hasError: false};
   }
 
   render() {
@@ -37,7 +37,8 @@ export default class ErrorBoundary extends React.Component {
           </div>
           <p style={{width: '80%', textAlign: 'center'}}>
             Please copy the contents in the above box and create an issue in the
-            github repo: https://github.com/manojVivek/responsively-app/issues
+            github repo:
+            https://github.com/responsively-org/responsively-app/issues
           </p>
         </Fragment>
       );
