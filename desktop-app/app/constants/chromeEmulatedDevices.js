@@ -1,4 +1,4 @@
-//https://cs.chromium.org/codesearch/f/chromium/src/third_party/blink/renderer/devtools/front_end/emulated_devices/module.json
+// https://cs.chromium.org/codesearch/f/chromium/src/third_party/blink/renderer/devtools/front_end/emulated_devices/module.json
 
 export default {
   extensions: [
@@ -150,7 +150,7 @@ export default {
       type: 'emulated-device',
       order: 32,
       device: {
-        'show-by-default': true,
+        'show-by-default': false,
         title: 'iPhone 6/7/8 Plus',
         screen: {
           horizontal: {
@@ -530,7 +530,7 @@ export default {
       type: 'emulated-device',
       order: 20,
       device: {
-        'show-by-default': false,
+        'show-by-default': true,
         title: 'Pixel 2',
         screen: {
           horizontal: {
@@ -1219,7 +1219,7 @@ export default {
       type: 'emulated-device',
       device: {
         'show-by-default': true,
-        title: 'Laptop',
+        title: 'Generic Laptop',
         screen: {
           horizontal: {
             width: 1280,
@@ -1292,6 +1292,210 @@ export default {
         capabilities: [],
         'user-agent': '',
         type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '36',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: 'MacBook Air',
+        screen: {
+          horizontal: {
+            width: 1440,
+            height: 900,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 900,
+            height: 1440,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '37',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: 'MacBook Pro 13"',
+        screen: {
+          horizontal: {
+            width: 2560,
+            height: 1600,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 1600,
+            height: 2580,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '38',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: 'MacBook Pro 15"',
+        screen: {
+          horizontal: {
+            width: 2880,
+            height: 1800,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 1800,
+            height: 2880,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '39',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: 'MacBook Pro 16"',
+        screen: {
+          horizontal: {
+            width: 3072,
+            height: 1920,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 1920,
+            height: 3072,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '40',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: '4K Display',
+        screen: {
+          horizontal: {
+            width: 3840,
+            height: 2160,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 2160,
+            height: 3840,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '41',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: '5K Display',
+        screen: {
+          horizontal: {
+            width: 5120,
+            height: 2880,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 2880,
+            height: 5120,
+          },
+        },
+        capabilities: [],
+        'user-agent': '',
+        type: 'notebook',
+        modes: [
+          {
+            title: 'default',
+            orientation: 'horizontal',
+            insets: {left: 0, top: 0, right: 0, bottom: 0},
+          },
+        ],
+      },
+    },
+    {
+      id: '34',
+      type: 'emulated-device',
+      device: {
+        'show-by-default': false,
+        title: 'Responsive Mode',
+        screen: {
+          horizontal: {
+            width: 500,
+            height: 790,
+          },
+          'device-pixel-ratio': 2,
+          vertical: {
+            width: 500,
+            height: 790,
+          },
+        },
+        capabilities: ['responsive', 'mobile'],
+        'user-agent':
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
+        type: 'phone',
         modes: [
           {
             title: 'default',

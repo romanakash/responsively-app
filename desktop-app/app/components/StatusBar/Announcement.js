@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import cx from 'classnames';
+import {shell} from 'electron';
 
 import styles from './styles.module.css';
 
@@ -7,10 +8,14 @@ const Announcement = () => {
   const [data, setData] = useState(null);
   useEffect(() => {
     (async () => {
-      const response = await (
-        await fetch('https://responsively.app/assets/appMessages.json')
-      ).json();
-      setData(response.statusBarMessage);
+      try {
+        const response = await (
+          await fetch('https://responsively.app/assets/appMessages.json')
+        ).json();
+        setData(response.statusBarMessage);
+      } catch (err) {
+        console.log('Error fetching appMessages.json', err);
+      }
     })();
   }, []);
 
@@ -21,7 +26,7 @@ const Announcement = () => {
   return (
     <div className={styles.section}>
       <div
-        className={styles.link}
+        className={cx(styles.text, styles.link)}
         onClick={() => shell.openExternal(data.link)}
       >
         <span className={cx('featureSuggestionLink', styles.linkText)}>

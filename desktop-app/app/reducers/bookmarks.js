@@ -2,7 +2,6 @@ import settings from 'electron-settings';
 import {TOGGLE_BOOKMARK, EDIT_BOOKMARK} from '../actions/bookmarks';
 import {BOOKMARKS} from '../constants/settingKeys';
 import {getWebsiteName} from '../components/WebView/screenshotUtil';
-import console from 'electron-timber';
 
 type BookmarksType = {
   title: string,
@@ -25,7 +24,7 @@ export default function browser(
 ) {
   switch (action.type) {
     case TOGGLE_BOOKMARK:
-      let bookmarks = state.bookmarks;
+      let {bookmarks} = state;
       const bookmark = {
         title: action.title || getWebsiteName(action.url),
         url: action.url,

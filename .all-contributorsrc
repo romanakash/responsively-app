@@ -145,9 +145,135 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "MuminjonGuru",
+      "name": "Abduraimov Muminjon",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/24930020?v=4",
+      "profile": "https://linkedin.com/in/muminjon-abduraimov/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "vlazaroes",
+      "name": "Víctor Lázaro",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/38981659?v=4",
+      "profile": "https://www.vlazaro.es/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kvnam",
+      "name": "Kavita Nambissan",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3608742?v=4",
+      "profile": "https://github.com/kvnam",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "prashantpalikhe",
+      "name": "Prashant Palikhe",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/2657709?v=4",
+      "profile": "https://twitter.com/PrashantPalikhe",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jaunesarmiento",
+      "name": "Jaune Sarmiento",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1166928?v=4",
+      "profile": "https://github.com/jaunesarmiento",
+      "contributions": [
+        "content"
+      ]
+    },
+    {
+      "login": "diego-vieira",
+      "name": "Diego Vieira",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/930792?v=4",
+      "profile": "https://github.com/diego-vieira",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pajaydev",
+      "name": "Ajaykumar",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/21375014?v=4",
+      "profile": "https://github.com/pajaydev",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "kirubakarthikeyan",
+      "name": "Kiruba Karan",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/38885946?v=4",
+      "profile": "https://github.com/kirubakarthikeyan",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "sebasrodriguez",
+      "name": "Sebastián Rodríguez",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1605931?v=4",
+      "profile": "https://github.com/sebasrodriguez",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "karthick3018",
+      "name": "Karthick Raja",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/47154512?v=4",
+      "profile": "https://github.com/karthick3018",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "jzabala",
+      "name": "Johnny Zabala",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/1315054?v=4",
+      "profile": "https://github.com/jzabala",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "rossmoody",
+      "name": "Ross Moody",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/29072694?v=4",
+      "profile": "http://rossmoody.com",
+      "contributions": [
+        "design"
+      ]
+    },
+    {
+      "login": "mehrdad-shokri",
+      "name": "Mehrdad Shokri",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/13661520?v=4",
+      "profile": "https://shokri.me",
+      "contributions": [
+        "infra"
+      ]
+    },
+    {
+      "login": "abakermi",
+      "name": "Abdelhak Akermi",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/60294727?v=4",
+      "profile": "https://github.com/abakermi",
+      "contributions": [
+        "code"
+      ]
     }
   ],
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 5,
   "projectName": "responsively-app",
   "projectOwner": "manojVivek",
   "repoType": "github",

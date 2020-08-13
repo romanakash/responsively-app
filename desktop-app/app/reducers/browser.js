@@ -1,4 +1,8 @@
 // @flow
+import {ipcRenderer, remote} from 'electron';
+import settings from 'electron-settings';
+import {isIfStatement} from 'typescript';
+import trimStart from 'lodash/trimStart';
 import {
   NEW_ADDRESS,
   NEW_ZOOM_LEVEL,
@@ -19,11 +23,15 @@ import {
   DEVICE_LOADING,
   NEW_FOCUSED_DEVICE,
   NEW_PAGE_META_FIELD,
+  TOGGLE_ALL_DEVICES_MUTED,
+  TOGGLE_DEVICE_MUTED,
 } from '../actions/browser';
+import {
+  CHANGE_ACTIVE_THROTTLING_PROFILE,
+  SAVE_THROTTLING_PROFILES,
+} from '../actions/networkConfig';
 import type {Action} from './types';
 import getAllDevices from '../constants/devices';
-import {ipcRenderer, remote} from 'electron';
-import settings from 'electron-settings';
 import type {Device} from '../constants/devices';
 import {
   FLEXIGRID_LAYOUT,
@@ -35,15 +43,15 @@ import {
   ACTIVE_DEVICES,
   USER_PREFERENCES,
   CUSTOM_DEVICES,
+  NETWORK_CONFIGURATION,
 } from '../constants/settingKeys';
-import {isIfStatement} from 'typescript';
 import {
   getHomepage,
   getLastOpenedAddress,
   saveHomepage,
   saveLastOpenedAddress,
 } from '../utils/navigatorUtils';
-import console from 'electron-timber';
+import {updateExistingUrl} from '../services/searchUrlSuggestions';
 
 export const FILTER_FIELDS = {
   OS: 'OS',
@@ -108,11 +116,27 @@ type UserPreferenceType = {
   reopenLastAddress: boolean,
   drawerState: boolean,
   devToolsOpenMode: DevToolsOpenModeType,
+  deviceOutlineStyle: string,
+  zoomLevel: number,
 };
 
 type FilterFieldType = FILTER_FIELDS.OS | FILTER_FIELDS.DEVICE_TYPE;
 
 type FilterType = {[key: FilterFieldType]: Array<string>};
+
+type NetworkThrottlingProfileType = {
+  type: 'Online' | 'Offline' | 'Preset' | 'Custom',
+  title: string,
+  downloadKps: number,
+  uploadKps: number,
+  latencyMs: number,
+  active: boolean,
+};
+
+type NetworkConfigurationType = {
+  throttling: NetworkThrottlingProfileType[],
+  // proxy: NetworkProxyProfileType[],
+};
 
 export type BrowserStateType = {
   devices: Array<Device>,
@@ -130,6 +154,8 @@ export type BrowserStateType = {
   devToolsConfig: DevToolsConfigType,
   isInspecting: boolean,
   windowSize: WindowSizeType,
+  allDevicesMuted: boolean,
+  networkConfiguration: NetworkConfigurationType,
 };
 
 let _activeDevices = null;
@@ -146,7 +172,7 @@ function _getActiveDevices() {
   if (_activeDevices) {
     return _activeDevices;
   }
-  let activeDeviceNames = settings.get(ACTIVE_DEVICES);
+  const activeDeviceNames = settings.get(ACTIVE_DEVICES);
   let activeDevices = null;
   if (activeDeviceNames && activeDeviceNames.length) {
     activeDevices = activeDeviceNames
@@ -161,6 +187,7 @@ function _getActiveDevices() {
   if (activeDevices) {
     activeDevices.forEach(device => {
       device.loading = false;
+      device.isMuted = false;
     });
   }
   return activeDevices;
@@ -191,7 +218,7 @@ export function getBounds(mode, _size, windowSize) {
   return {
     x: 0,
     y: height - viewHeight,
-    width: width,
+    width,
     height: viewHeight,
   };
 }
@@ -212,15 +239,83 @@ function _getUserPreferencesDevToolsMode() {
   return _getUserPreferences().devToolsOpenMode || DEVTOOLS_MODES.BOTTOM;
 }
 
+function _updateFileWatcher(newURL) {
+  if (
+    newURL.startsWith('file://') &&
+    (newURL.endsWith('.html') || newURL.endsWith('.htm'))
+  )
+    ipcRenderer.send('start-watching-file', {
+      path: newURL,
+    });
+  else ipcRenderer.send('stop-watcher');
+}
+
+function _getHomepage() {
+  const homepage = getHomepage();
+  _updateFileWatcher(homepage);
+  return homepage;
+}
+
+function getDefaultNetworkThrottlingProfiles(): NetworkThrottlingProfileType[] {
+  return [
+    {
+      type: 'Online',
+      title: 'Online',
+      active: true,
+    },
+    {
+      type: 'Offline',
+      title: 'Offline',
+      downloadKps: 0,
+      uploadKps: 0,
+      latencyMs: 0,
+    },
+    // https://github.com/ChromeDevTools/devtools-frontend/blob/4f404fa8beab837367e49f68e29da427361b1f81/front_end/sdk/NetworkManager.js#L251-L265
+    {
+      type: 'Preset',
+      title: 'Slow 3G',
+      downloadKps: 400,
+      uploadKps: 400,
+      latencyMs: 2000,
+    },
+    {
+      type: 'Preset',
+      title: 'Fast 3G',
+      downloadKps: 1475,
+      uploadKps: 675,
+      latencyMs: 563,
+    },
+  ];
+}
+
+function _getNetworkConfiguration(): NetworkConfigurationType {
+  const ntwrk: NetworkConfigurationType =
+    settings.get(NETWORK_CONFIGURATION) || {};
+
+  if (ntwrk.throttling == null)
+    ntwrk.throttling = getDefaultNetworkThrottlingProfiles();
+
+  // if (ntwrk.proxy == null)
+  //   ntwrk.proxy = getDefaultNetworkProxyProfiles();
+
+  return ntwrk;
+}
+
+function _setNetworkConfiguration(
+  networkConfiguration: NetworkConfigurationType
+) {
+  settings.set(NETWORK_CONFIGURATION, networkConfiguration);
+}
+
 export default function browser(
   state: BrowserStateType = {
     devices: _getActiveDevices(),
-    homepage: getHomepage(),
+    homepage: _getHomepage(),
     address: _getUserPreferences().reopenLastAddress
       ? getLastOpenedAddress()
       : getHomepage(),
     currentPageMeta: {},
-    zoomLevel: 0.6,
+    zoomLevel: _getUserPreferences().zoomLevel || 0.6,
     previousZoomLevel: null,
     scrollPosition: {x: 0, y: 0},
     navigatorStatus: {backEnabled: false, forwardEnabled: false},
@@ -251,12 +346,16 @@ export default function browser(
     },
     isInspecting: false,
     windowSize: getWindowSize(),
+    allDevicesMuted: false,
+    networkConfiguration: _getNetworkConfiguration(),
   },
   action: Action
 ) {
   switch (action.type) {
     case NEW_ADDRESS:
       saveLastOpenedAddress(action.address);
+      _updateFileWatcher(action.address);
+      updateExistingUrl(action.address);
       return {...state, address: action.address, currentPageMeta: {}};
     case NEW_PAGE_META_FIELD:
       return {
@@ -271,6 +370,10 @@ export default function browser(
       saveHomepage(homepage);
       return {...state, homepage};
     case NEW_ZOOM_LEVEL:
+      _setUserPreferences({
+        ...state.userPreferences,
+        zoomLevel: action.zoomLevel,
+      });
       return {...state, zoomLevel: action.zoomLevel};
     case NEW_SCROLL_POSITION:
       return {...state, scrollPosition: action.scrollPosition};
@@ -314,7 +417,7 @@ export default function browser(
       const existingCustomDevices = settings.get(CUSTOM_DEVICES) || [];
       settings.set(
         CUSTOM_DEVICES,
-        existingCustomDevices.filter(device => device.id != action.device.id)
+        existingCustomDevices.filter(device => device.id !== action.device.id)
       );
       return {...state, allDevices: getAllDevices()};
     case NEW_FILTERS:
@@ -344,6 +447,51 @@ export default function browser(
           : device
       );
       return {...state, devices: newDevicesList};
+    case TOGGLE_ALL_DEVICES_MUTED:
+      const updatedDevices = state.devices;
+      updatedDevices.forEach(d => (d.isMuted = action.allDevicesMuted));
+      return {
+        ...state,
+        allDevicesMuted: action.allDevicesMuted,
+        devices: updatedDevices,
+      };
+    case TOGGLE_DEVICE_MUTED:
+      const updatedDevice = state.devices.find(x => x.id === action.deviceId);
+      if (updatedDevice == null) return {...state};
+      updatedDevice.isMuted = action.isMuted;
+      return {
+        ...state,
+        allDevicesMuted: state.devices.every(x => x.isMuted),
+        devices: [...state.devices],
+      };
+    case CHANGE_ACTIVE_THROTTLING_PROFILE:
+      const throttling = state.networkConfiguration.throttling;
+      const activeProfile = throttling.find(x => x.title === action.title);
+      if (activeProfile != null) {
+        throttling.forEach(x => (x.active = false));
+        activeProfile.active = true;
+      }
+      return {
+        ...state,
+        networkConfiguration: {
+          ...state.networkConfiguration,
+          throttling: [...throttling],
+        },
+      };
+    case SAVE_THROTTLING_PROFILES:
+      action.profiles.forEach(x => (x.active = false));
+      action.profiles[0].active = true;
+      _setNetworkConfiguration({
+        ...state.networkConfiguration,
+        throttling: action.profiles,
+      });
+      return {
+        ...state,
+        networkConfiguration: {
+          ...state.networkConfiguration,
+          throttling: action.profiles,
+        },
+      };
     default:
       return state;
   }

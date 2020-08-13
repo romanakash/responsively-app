@@ -9,6 +9,7 @@ import {
   screen,
 } from 'electron';
 import * as os from 'os';
+import fs from 'fs';
 import {pkg} from './utils/generalUtils';
 import {
   getAllShortcuts,
@@ -17,6 +18,7 @@ import {
 import {appUpdater, AppUpdaterStatus} from './app-updater';
 import {statusBarSettings} from './settings/statusBarSettings';
 import {STATUS_BAR_VISIBILITY_CHANGE} from './constants/pubsubEvents';
+import {userPreferenceSettings} from './settings/userPreferenceSettings';
 
 const path = require('path');
 
@@ -25,6 +27,46 @@ export default class MenuBuilder {
 
   constructor(mainWindow: BrowserWindow) {
     this.mainWindow = mainWindow;
+  }
+
+  aboutClick() {
+    const iconPath = path.join(__dirname, '../resources/icons/64x64.png');
+    const title = 'Responsively';
+    const {description} = pkg;
+    const version = pkg.version || 'Unknown';
+    const electron = process.versions.electron || 'Unknown';
+    const chrome = process.versions.chrome || 'Unknown';
+    const node = process.versions.node || 'Unknown';
+    const v8 = process.versions.v8 || 'Unknown';
+    const osText =
+      `${os.type()} ${os.arch()} ${os.release()}`.trim() || 'Unknown';
+    const usefulInfo = `Version: ${version}\nElectron: ${electron}\nChrome: ${chrome}\nNode.js: ${node}\nV8: ${v8}\nOS: ${osText}`;
+    const detail = description ? `${description}\n\n${usefulInfo}` : usefulInfo;
+    let buttons = ['OK', 'Copy'];
+    let cancelId = 0;
+    let defaultId = 1;
+    if (process.platform === 'linux') {
+      buttons = ['Copy', 'OK'];
+      cancelId = 1;
+      defaultId = 0;
+    }
+    dialog
+      .showMessageBox(BrowserWindow.getAllWindows()[0], {
+        type: 'none',
+        buttons,
+        title,
+        message: title,
+        detail,
+        noLink: true,
+        icon: iconPath,
+        cancelId,
+        defaultId,
+      })
+      .then(({response}) => {
+        if (response === defaultId) {
+          clipboard.writeText(usefulInfo, 'clipboard');
+        }
+      });
   }
 
   subMenuHelp = {
@@ -39,14 +81,16 @@ export default class MenuBuilder {
       {
         label: 'Open Source',
         click() {
-          shell.openExternal('https://github.com/manojVivek/responsively-app');
+          shell.openExternal(
+            'https://github.com/responsively-org/responsively-app'
+          );
         },
       },
       {
         label: 'Report Issues',
         click() {
           shell.openExternal(
-            'https://github.com/manojVivek/responsively-app/issues'
+            'https://github.com/responsively-org/responsively-app/issues'
           );
         },
       },
@@ -63,6 +107,9 @@ export default class MenuBuilder {
             'https://twitter.com/intent/follow?original_referer=app&ref_src=twsrc%5Etfw&region=follow_link&screen_name=ResponsivelyApp&tw_p=followbutton'
           );
         },
+      },
+      {
+        type: 'separator',
       },
       {
         label: 'Keyboard Shortcuts',
@@ -100,6 +147,9 @@ export default class MenuBuilder {
         },
       },
       {
+        type: 'separator',
+      },
+      {
         label: 'Check for Updates...',
         id: 'CHECK_FOR_UPDATES',
         click() {
@@ -112,56 +162,19 @@ export default class MenuBuilder {
               dialog.showMessageBox(BrowserWindow.getAllWindows()[0], {
                 type: 'info',
                 title: 'Responsively',
-                message: 'There are currently no updates available',
+                message: 'The app is up to date! 🎉',
               });
             }
           });
         },
       },
       {
+        type: 'separator',
+      },
+      {
         label: 'About',
         accelerator: 'F1',
-        click() {
-          const iconPath = path.join(__dirname, '../resources/icons/64x64.png');
-          const title = 'Responsively';
-          const {description} = pkg;
-          const version = pkg.version || 'Unknown';
-          const electron = process.versions.electron || 'Unknown';
-          const chrome = process.versions.chrome || 'Unknown';
-          const node = process.versions.node || 'Unknown';
-          const v8 = process.versions.v8 || 'Unknown';
-          const osText =
-            `${os.type()} ${os.arch()} ${os.release()}`.trim() || 'Unknown';
-          const usefulInfo = `Version: ${version}\nElectron: ${electron}\nChrome: ${chrome}\nNode.js: ${node}\nV8: ${v8}\nOS: ${osText}`;
-          const detail = description
-            ? `${description}\n\n${usefulInfo}`
-            : usefulInfo;
-          let buttons = ['OK', 'Copy'];
-          let cancelId = 0;
-          let defaultId = 1;
-          if (process.platform === 'linux') {
-            buttons = ['Copy', 'OK'];
-            cancelId = 1;
-            defaultId = 0;
-          }
-          dialog
-            .showMessageBox(BrowserWindow.getAllWindows()[0], {
-              type: 'none',
-              buttons,
-              title,
-              message: title,
-              detail,
-              noLink: true,
-              icon: iconPath,
-              cancelId,
-              defaultId,
-            })
-            .then(({response}) => {
-              if (response === defaultId) {
-                clipboard.writeText(usefulInfo, 'clipboard');
-              }
-            });
-        },
+        click: this.aboutClick,
       },
     ],
   };
@@ -186,6 +199,29 @@ export default class MenuBuilder {
           this.mainWindow.webContents.send('address-change', filePath);
         },
       },
+      {
+        label: 'Open Screenshots folder',
+        click: () => {
+          try {
+            const userSelectedScreenShotSavePath = userPreferenceSettings.getScreenShotSavePath();
+            const dir =
+              userSelectedScreenShotSavePath ||
+              userPreferenceSettings.getDefaultScreenshotpath();
+            if (!fs.existsSync(dir)) {
+              fs.mkdirSync(dir);
+            }
+            shell.openPath(dir);
+          } catch (err) {
+            console.log('Error opening screenshots folder', err);
+          }
+        },
+      },
+      {
+        type: 'separator',
+      },
+      {
+        role: process.platform === 'darwin' ? 'close' : 'quit',
+      },
     ],
   };
 
@@ -194,29 +230,31 @@ export default class MenuBuilder {
     let label = 'Check for Updates...';
     let enabled = true;
 
-    switch(updaterStatus) {
+    switch (updaterStatus) {
       case AppUpdaterStatus.Idle:
         label = 'Check for Updates...';
         enabled = true;
         break;
       case AppUpdaterStatus.Checking:
         label = 'Checking for Updates...';
-        enabled = false;  
+        enabled = false;
         break;
       case AppUpdaterStatus.NoUpdate:
         label = 'No Updates';
-        enabled = false;  
+        enabled = false;
         break;
       case AppUpdaterStatus.Downloading:
         label = 'Downloading Update...';
-        enabled = false;  
+        enabled = false;
         break;
       case AppUpdaterStatus.Downloaded:
         label = 'Update Downloaded';
-        enabled = false;  
+        enabled = false;
+        break;
+      default:
         break;
     }
-    
+
     return {label, enabled};
   }
 
@@ -271,10 +309,11 @@ export default class MenuBuilder {
     const subMenuAbout = {
       label: 'Responsively',
       submenu: [
-        // {
-        //   label: 'About ResponsivelyApp',
-        //   selector: 'orderFrontStandardAboutPanel:',
-        // },
+        {
+          label: 'About ResponsivelyApp',
+          selector: 'orderFrontStandardAboutPanel:',
+          click: this.aboutClick,
+        },
         {type: 'separator'},
         // {label: 'Services', submenu: []},
         {type: 'separator'},
